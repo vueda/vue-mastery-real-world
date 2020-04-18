@@ -19,14 +19,13 @@ const routes = [
     props: true
   },
   {
-    path: '/event/create',
+    path: '/event-create',
     name: 'event-create',
     component: EventCreate
   }
 ]
 
 const router = new VueRouter({
-  mode: 'history',
   base: process.env.BASE_URL,
   routes
 })
