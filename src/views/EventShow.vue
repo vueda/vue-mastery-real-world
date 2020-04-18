@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="event-header">
-      <span class="eyebrow">@{{ event.time }} on {{ event.date }}</span>
+      <span class="eyebrow">@{{ event.time }} on {{ event.date | date }}</span>
       <h1 class="title">{{ event.title }}</h1>
       <h5>Organized by {{ event.organizer }}</h5>
       <h5>Category: {{ event.category }}</h5>
@@ -29,17 +29,27 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import store from '@/store/index'
 
 export default {
-  props: ['id'],
-  computed: mapState({
-    event: state => state.event.event
-  }),
-  created() {
-    this.fetchEvent(this.id)
+  props: {
+    event: {
+      type: Object,
+      required: true
+    }
   },
-  methods: mapActions('event', ['fetchEvent'])
+
+  beforeRouteUpdate(to, from, next) {
+    store
+      .dispatch('event/fetchEvent', to.params.id)
+      .then(event => {
+        to.params.event = event
+        next()
+      })
+      .catch(() => {
+        next({ name: '404', params: { resource: 'event' } })
+      })
+  }
 }
 </script>
 

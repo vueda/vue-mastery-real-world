@@ -2,6 +2,7 @@ import EventService from '@/services/EventService.js'
 
 export const namespaced = true
 export const state = {
+  perPage: 3,
   eventsCount: 0,
   events: [],
   event: {}
@@ -49,8 +50,8 @@ export const actions = {
         throw err
       })
   },
-  fetchEvents({ commit, dispatch }, { perPage, pageNum }) {
-    EventService.getEvents(perPage, pageNum)
+  fetchEvents({ commit, dispatch, state }, { pageNum }) {
+    return EventService.getEvents(state.perPage, pageNum)
       .then(res => {
         commit('SET_EVENTS', res.data)
         commit('SET_EVENTS_COUNT', res.headers['x-total-count'])
@@ -66,23 +67,16 @@ export const actions = {
         )
       )
   },
-  fetchEvent({ commit, getters, dispatch }, id) {
+  fetchEvent({ commit, getters }, id) {
     const event = getters.getEventById(id)
     if (event) {
       commit('SET_EVENT', event)
+      return event
     } else {
-      EventService.getEvent(id)
-        .then(res => commit('SET_EVENT', res.data))
-        .catch(err =>
-          dispatch(
-            'notification/add',
-            {
-              type: 'error',
-              message: `There was an error fetching event ${id}: ` + err.message
-            },
-            { root: true }
-          )
-        )
+      return EventService.getEvent(id).then(({ data }) => {
+        commit('SET_EVENT', data)
+        return data
+      })
     }
   }
 }
